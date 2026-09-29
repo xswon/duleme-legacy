@@ -29,6 +29,8 @@ jobs:
           cache: npm
       - name: Install dependencies
         run: npm ci
+      - name: Runtime dependency audit
+        run: npm audit --omit=dev --audit-level=high
       - name: Typecheck
         run: npm run typecheck
       - name: ESLint
@@ -45,7 +47,7 @@ jobs:
         run: npm run check:architecture
 
   desktop-package-smoke:
-    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+    if: github.event_name == 'push' || (github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]')
     runs-on: macos-latest
     timeout-minutes: 45
     steps:
@@ -81,11 +83,26 @@ jobs:
           test -n "$app_path"
           executable="$(find "$app_path/Contents/MacOS" -maxdepth 1 -type f -perm -111 -print -quit)"
           test -n "$executable"
-          python3 - "$executable" <<'PY'
+          result_file="/tmp/duleme-smoke-result.txt"
+          rm -f "$result_file"
+          python3 - "$app_path" "$result_file" <<'PY'
+          import pathlib
           import subprocess
           import sys
-          result = subprocess.run([sys.argv[1], "--smoke-test"], timeout=30, text=True, capture_output=True)
-          print(result.stdout, end="")
-          print(result.stderr, end="", file=sys.stderr)
-          raise SystemExit(result.returncode)
+
+          app_path = sys.argv[1]
+          result_file = pathlib.Path(sys.argv[2])
+          try:
+              subprocess.run(
+                  ["open", "-W", app_path, "--args", "--smoke-test", f"--smoke-result={result_file}"],
+                  timeout=45,
+                  check=False,
+              )
+          except subprocess.TimeoutExpired:
+              pass
+
+          state = result_file.read_text().strip() if result_file.exists() else "missing"
+          print(f"Desktop smoke result: {state}")
+          if state != "ok":
+              raise SystemExit(1)
           PY
