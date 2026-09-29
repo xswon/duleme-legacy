@@ -29,6 +29,16 @@ http://127.0.0.1:4387
 
 前端通过统一的 `ReaderBackend` 边界访问后端能力；Web 版本使用 HTTP adapter，Tauri 版本使用 desktop adapter。架构与迁移顺序见 `docs/BACKEND_ARCHITECTURE.md`。
 
+当前 Tauri 原型只迁移 RSS 获取/解析主链路，用于验证启动、订阅和真实包体；AI、转录等可选能力暂未迁移到桌面 Rust 后端。
+
+本地构建原型需要 Rust toolchain 和 Tauri CLI 2.12：
+
+```bash
+cargo install tauri-cli --version 2.12.0 --locked
+npm run desktop:build
+```
+
+
 ## 数据与隐私
 
 - 阅读数据主要保存在本机 IndexedDB。
