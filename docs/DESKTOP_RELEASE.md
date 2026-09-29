@@ -66,7 +66,7 @@ release token.
 
 Before publishing a new beta, validate both Apple Silicon and Intel builds on Macs that do not have the source checkout or development dependencies installed.
 
-Automated CI mounts the native DMG on a fresh GitHub-hosted macOS runner and launches the packaged app with `--smoke-test`. The smoke test starts the packaged loopback server, loads `/api/health`, and exits successfully. CI also builds both arm64 and x64 DMGs so packaging regressions fail before merge.
+Automated CI builds both arm64 and x64 DMGs on a fresh GitHub-hosted macOS runner, starts the production server bundle and verifies `/api/health`, mounts both DMGs, and validates the packaged `.app` structure, bundle identifier, version, `app.asar`, executable, and target architecture. GitHub-hosted macOS runners do not provide a reliable interactive GUI session, so CI does **not** claim to validate Gatekeeper or real window startup; those remain mandatory clean-Mac acceptance checks.
 
 The final human acceptance pass should cover each architecture at least once:
 
