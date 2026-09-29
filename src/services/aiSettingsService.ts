@@ -1,4 +1,5 @@
 import { AiConfig, AiSecret } from "../types";
+import { backendRequest } from "./readerBackend";
 import {
   deleteSecretFromDB,
   getAppStateFromDB,
@@ -96,7 +97,7 @@ export async function getAiRequestConfig(): Promise<AiRequestConfig | undefined>
 
 async function getEnvironmentCapability(): Promise<AiCapability> {
   try {
-    const response = await fetch("/api/ai/status");
+    const response = await backendRequest("/api/ai/status");
     if (!response.ok) return { configured: false };
     const payload = await response.json();
     return {
@@ -133,7 +134,7 @@ export async function testAiConnection(
   config: Pick<AiConfig, "baseURL" | "model">,
   apiKey: string,
 ): Promise<number> {
-  const response = await fetch("/api/ai/test", {
+  const response = await backendRequest("/api/ai/test", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
