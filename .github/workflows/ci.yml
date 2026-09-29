@@ -86,9 +86,9 @@ jobs:
           {
             echo "## Tauri macOS prototype size"
             echo ""
-            echo "- Runner architecture: `$(uname -m)`"
-            echo "- App bundle: `$app_path` — $((app_kb / 1024)) MiB"
-            echo "- DMG: `$dmg_path` — $((dmg_bytes / 1024 / 1024)) MiB"
+            echo "- Runner architecture: $(uname -m)"
+            echo "- App bundle: $app_path — $((app_kb / 1024)) MiB"
+            echo "- DMG: $dmg_path — $((dmg_bytes / 1024 / 1024)) MiB"
           } >> "$GITHUB_STEP_SUMMARY"
           du -sh "$app_path" "$dmg_path"
       - name: Upload Tauri DMG
