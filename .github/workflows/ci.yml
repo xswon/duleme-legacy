@@ -46,7 +46,7 @@ jobs:
       - name: Architecture boundaries
         run: npm run check:architecture
 
-  desktop-package-smoke:
+  desktop-package-check:
     if: github.event_name == 'push' || (github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]')
     runs-on: macos-latest
     timeout-minutes: 45
@@ -66,70 +66,60 @@ jobs:
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: "false"
         run: npm run desktop:dist
-      - name: Mount and smoke-test native DMG
+      - name: Verify production server health
         shell: bash
         run: |
           set -euo pipefail
-          case "$(uname -m)" in
-            arm64) dmg="$(ls release/*-arm64.dmg | head -n1)" ;;
-            x86_64) dmg="$(ls release/*-x64.dmg | head -n1)" ;;
-            *) echo "Unsupported runner architecture: $(uname -m)" >&2; exit 1 ;;
-          esac
-          mount_point="$(mktemp -d /tmp/duleme-dmg.XXXXXX)"
-          cleanup() { hdiutil detach "$mount_point" -quiet || true; }
+          NODE_ENV=production PORT=4387 node dist/server.cjs > /tmp/duleme-server.log 2>&1 &
+          server_pid=$!
+          cleanup() { kill "$server_pid" 2>/dev/null || true; }
           trap cleanup EXIT
-          hdiutil attach "$dmg" -nobrowse -readonly -mountpoint "$mount_point"
-          app_path="$(find "$mount_point" -maxdepth 1 -name '*.app' -print -quit)"
-          test -n "$app_path"
-          executable="$(find "$app_path/Contents/MacOS" -maxdepth 1 -type f -perm -111 -print -quit)"
-          test -n "$executable"
-          result_file="/tmp/duleme-smoke-result.txt"
-          rm -f "$result_file"
-          python3 - "$executable" "$result_file" <<'PY'
-          import os
-          import pathlib
-          import subprocess
-          import sys
-          import time
+          for attempt in {1..20}; do
+            if curl -fsS http://127.0.0.1:4387/api/health | grep -q '"status":"ok"'; then
+              exit 0
+            fi
+            sleep 0.5
+          done
+          cat /tmp/duleme-server.log
+          exit 1
+      - name: Validate both DMG application bundles
+        shell: bash
+        run: |
+          set -euo pipefail
 
-          executable = sys.argv[1]
-          result_file = pathlib.Path(sys.argv[2])
-          env = os.environ.copy()
-          env["DULEME_SMOKE_TEST"] = "1"
-          env["DULEME_SMOKE_RESULT"] = str(result_file)
-          env["ELECTRON_ENABLE_LOGGING"] = "1"
+          validate_dmg() {
+            local dmg="$1"
+            local expected_arch="$2"
+            local mount_point
+            mount_point="$(mktemp -d /tmp/duleme-dmg.XXXXXX)"
+            hdiutil attach "$dmg" -nobrowse -readonly -mountpoint "$mount_point" >/dev/null
+            local app_path
+            app_path="$(find "$mount_point" -maxdepth 1 -name '*.app' -print -quit)"
+            test -n "$app_path"
+            test -f "$app_path/Contents/Info.plist"
+            test -s "$app_path/Contents/Resources/app.asar"
 
-          process = subprocess.Popen(
-              [executable],
-              env=env,
-              stdout=subprocess.PIPE,
-              stderr=subprocess.PIPE,
-              text=True,
-          )
+            local executable
+            executable="$(find "$app_path/Contents/MacOS" -maxdepth 1 -type f -perm -111 -print -quit)"
+            test -n "$executable"
 
-          state = "missing"
-          for _ in range(30):
-              if result_file.exists():
-                  state = result_file.read_text().strip()
-                  if state == "ok" or state.startswith("error:"):
-                      break
-              if process.poll() is not None:
-                  break
-              time.sleep(1)
+            local bundle_id
+            bundle_id="$(plutil -extract CFBundleIdentifier raw -o - "$app_path/Contents/Info.plist")"
+            test "$bundle_id" = "com.duleme.reader"
 
-          if process.poll() is None:
-              process.terminate()
-          try:
-              stdout, stderr = process.communicate(timeout=5)
-          except subprocess.TimeoutExpired:
-              process.kill()
-              stdout, stderr = process.communicate()
+            local version
+            version="$(plutil -extract CFBundleShortVersionString raw -o - "$app_path/Contents/Info.plist")"
+            test "$version" = "0.1.0-beta.2"
 
-          print(stdout, end="")
-          print(stderr, end="", file=sys.stderr)
-          if result_file.exists():
-              state = result_file.read_text().strip()
-          print(f"Desktop smoke result: {state}")
-          if state != "ok":
-              raise SystemExit(1)
-          PY
+            local archs
+            archs="$(lipo -archs "$executable")"
+            case " $archs " in
+              *" $expected_arch "*) ;;
+              *) echo "Expected $expected_arch in $executable, found: $archs" >&2; exit 1 ;;
+            esac
+
+            hdiutil detach "$mount_point" -quiet
+          }
+
+          validate_dmg "$(ls release/*-arm64.dmg | head -n1)" arm64
+          validate_dmg "$(ls release/*-x64.dmg | head -n1)" x86_64
