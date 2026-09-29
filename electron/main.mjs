@@ -1,3 +1,4 @@
+import fs from "node:fs";
 import path from "node:path";
 import { app, BrowserWindow, shell } from "electron";
 import { startServer } from "../server.ts";
@@ -80,21 +81,35 @@ async function createMainWindow() {
   await win.loadURL(appUrl);
 }
 
+function smokeResultPath() {
+  const prefix = "--smoke-result=";
+  const arg = process.argv.find((value) => value.startsWith(prefix));
+  return arg ? arg.slice(prefix.length) : "";
+}
+
+function writeSmokeResult(value) {
+  const resultPath = smokeResultPath();
+  if (resultPath) fs.writeFileSync(resultPath, value, "utf8");
+}
+
 async function runSmokeTest() {
-  console.log("Starting packaged Duleme smoke test");
+  writeSmokeResult("starting");
   const appUrl = await ensureLocalServer();
   const response = await fetch(`${appUrl}/api/health`);
   if (!response.ok) throw new Error(`Desktop smoke test failed: HTTP ${response.status}`);
-  console.log("Duleme desktop smoke test passed");
+  writeSmokeResult("ok");
   localServer?.close();
 }
 
 if (process.argv.includes("--smoke-test")) {
-  runSmokeTest()
-    .then(() => process.exit(0))
+  app.whenReady()
+    .then(runSmokeTest)
+    .then(() => app.exit(0))
     .catch((error) => {
+      const message = error instanceof Error ? error.message : String(error);
+      try { writeSmokeResult(`error:${message}`); } catch { /* best effort */ }
       console.error("Duleme desktop smoke test failed", error);
-      process.exit(1);
+      app.exit(1);
     });
 } else {
   app.whenReady().then(async () => {
