@@ -39,7 +39,13 @@
   },
   "bundle": {
     "active": true,
-    "targets": ["app", "dmg"],
-    "category": "News"
+    "targets": [
+      "app",
+      "dmg"
+    ],
+    "category": "News",
+    "icon": [
+      "icons/icon.png"
+    ]
   }
 }
