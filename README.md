@@ -1,34 +1,64 @@
-# 读了么 Releases
+# 读了么（Duleme）
 
-这里是 **读了么（Duleme）Desktop** 的公开下载仓库。
+读了么是一个本地优先的 RSS 阅读器，支持 RSS/Podcast 订阅、阅读状态、收藏、笔记、音频播放，以及可选的 AI 摘要与转录能力。
 
-本仓库只用于发布桌面安装包、校验文件和简短的版本说明，不包含应用源码。
+## 当前状态
 
-## 下载
+项目目前处于 Public Beta 准备阶段。主线以本地单用户使用为目标，不是公开互联网多用户服务。
 
-前往 [Releases](../../releases) 获取最新 macOS 公测版。
+## 运行方式
 
-- Apple Silicon（M1 / M2 / M3 / M4 等）：下载 `arm64` DMG
-- Intel Mac：下载 `x64` DMG
-- `SHA256SUMS.txt` 可用于校验下载文件
+需要 Node.js 22。
 
-## macOS 首次打开
+```bash
+npm ci
+npm run dev
+```
 
-当前公测版暂未使用 Apple Developer ID 签名和 notarization。
+默认本地地址：
 
-如果第一次打开时 macOS 阻止启动：
+```text
+http://127.0.0.1:4387
+```
 
-1. 先尝试打开一次“读了么”；
-2. 打开 **系统设置 → 隐私与安全性**；
-3. 找到“读了么”被阻止的提示；
-4. 点击 **仍要打开**；
-5. 再确认 **打开**。
+也可以使用仓库中的 Docker Compose 开发环境。
 
-不需要执行 Terminal 命令。
+## Desktop
 
-## 数据
+macOS Desktop 版本使用 Electron 打包，目标包括 Apple Silicon（arm64）和 Intel（x64）。
 
-读了么采用 local-first 方式，订阅、阅读状态、收藏、笔记和播放进度默认保存在本机。
+```bash
+npm run desktop:dist
+```
 
----
-Desktop V0.1 · macOS public beta
+当前 Beta 构建尚未使用 Apple Developer ID 签名或 notarization，首次打开可能需要通过 macOS 的“系统设置 → 隐私与安全性 → 仍要打开”。
+
+## 数据与隐私
+
+- 阅读数据主要保存在本机 IndexedDB。
+- AI 摘要为可选功能；启用后，相应文章/逐字稿内容会发送给用户配置的 AI 服务商。
+- 云端转录为可选功能；启用后，音频地址和转录请求会发送给对应服务商。
+- AI API Key 使用独立本地 secrets store 保存，不进入业务数据备份。
+- 服务端 API 默认限制为本机访问，不应直接暴露到公网。
+
+更多 AI 配置说明见 `docs/AI_CONFIGURATION.md`。
+
+## 开发与验证
+
+完整质量门禁：
+
+```bash
+npm run verify
+```
+
+包括 TypeScript、ESLint、测试覆盖率、构建、bundle budget 和架构边界检查。
+
+贡献说明见 `CONTRIBUTING.md`。
+
+## 安全问题
+
+请参阅 `SECURITY.md`。不要在公开 Issue 中提交 API Key、访问令牌或未公开漏洞细节。
+
+## License
+
+目前尚未选择开源许可证。在加入明确的 LICENSE 文件之前，本仓库的公开可见性不代表授予复制、修改或再分发代码的许可。

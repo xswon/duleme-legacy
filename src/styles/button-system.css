@@ -1,0 +1,432 @@
+/*
+ * Shared button system
+ * --------------------
+ * This file is loaded after the prototype styles so it can normalize button
+ * behavior without flattening semantic controls such as navigation, segmented
+ * filters, reader settings, or the audio player.
+ */
+
+:root {
+  --wreader-btn-height-sm: 30px;
+  --wreader-btn-height-md: 36px;
+  --wreader-btn-height-lg: 40px;
+  --wreader-btn-radius-sm: 6px;
+  --wreader-btn-radius-md: 8px;
+  --wreader-btn-radius-lg: 10px;
+  --wreader-btn-font-sm: 11px;
+  --wreader-btn-font-md: 12px;
+  --wreader-btn-font-lg: 13px;
+  --wreader-btn-font-weight: 650;
+
+  --wreader-btn-primary: #3175c6;
+  --wreader-btn-primary-hover: #286aa9;
+  --wreader-btn-primary-active: #245f98;
+  --wreader-btn-primary-text: #ffffff;
+
+  --wreader-btn-secondary: #edf1f5;
+  --wreader-btn-secondary-hover: #e2e8ef;
+  --wreader-btn-secondary-active: #d7dee6;
+  --wreader-btn-secondary-text: #4f6172;
+
+  --wreader-btn-ghost-hover: #eef2f6;
+  --wreader-btn-ghost-active: #e2e8ef;
+  --wreader-btn-ghost-text: #5d6d7d;
+
+  --wreader-btn-danger: #b55353;
+  --wreader-btn-danger-hover: #9f3f3f;
+  --wreader-btn-danger-bg-hover: #fdeeee;
+
+  --wreader-btn-focus: #4b86cc;
+  --wreader-btn-disabled-opacity: .52;
+  --wreader-btn-transition: 140ms ease;
+}
+
+/* Native reset + interaction contract shared by every button in the product. */
+button {
+  appearance: none;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  transition:
+    background-color var(--wreader-btn-transition),
+    border-color var(--wreader-btn-transition),
+    color var(--wreader-btn-transition),
+    box-shadow var(--wreader-btn-transition),
+    opacity var(--wreader-btn-transition);
+}
+
+button:focus-visible {
+  outline: 2px solid var(--wreader-btn-focus);
+  outline-offset: 2px;
+}
+
+button:disabled,
+button[aria-disabled="true"] {
+  cursor: not-allowed;
+  opacity: var(--wreader-btn-disabled-opacity);
+}
+
+button.wreader-featured-feed-card {
+  border: 1px solid #e2e8f0;
+  padding: 12px 14px;
+  background: #fff;
+}
+
+button.wreader-featured-feed-card[aria-pressed="true"] {
+  border-color: #bfdbfe;
+  background: #eff6ff;
+}
+
+button.wreader-featured-feed-card:hover {
+  border-color: #93c5fd;
+}
+
+/* Reusable action primitives for new UI and ad-hoc actions. */
+.wreader-btn {
+  min-height: var(--wreader-btn-height-md);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 14px;
+  border: 1px solid transparent;
+  border-radius: var(--wreader-btn-radius-md);
+  font-size: var(--wreader-btn-font-md);
+  font-weight: var(--wreader-btn-font-weight);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.wreader-btn:not(:disabled):active {
+  transform: translateY(1px);
+}
+
+.wreader-btn-primary {
+  background: var(--wreader-btn-primary);
+  color: var(--wreader-btn-primary-text);
+}
+
+.wreader-btn-primary:hover:not(:disabled) {
+  background: var(--wreader-btn-primary-hover);
+}
+
+.wreader-btn-primary:active:not(:disabled) {
+  background: var(--wreader-btn-primary-active);
+}
+
+.wreader-btn-secondary {
+  background: var(--wreader-btn-secondary);
+  color: var(--wreader-btn-secondary-text);
+}
+
+.wreader-btn-secondary:hover:not(:disabled) {
+  background: var(--wreader-btn-secondary-hover);
+}
+
+.wreader-btn-secondary:active:not(:disabled) {
+  background: var(--wreader-btn-secondary-active);
+}
+
+.wreader-btn-ghost {
+  color: var(--wreader-btn-ghost-text);
+}
+
+.wreader-btn-ghost:hover:not(:disabled) {
+  background: var(--wreader-btn-ghost-hover);
+  color: #33475a;
+}
+
+.wreader-btn-ghost:active:not(:disabled) {
+  background: var(--wreader-btn-ghost-active);
+}
+
+.wreader-btn-danger {
+  color: var(--wreader-btn-danger);
+}
+
+.wreader-btn-danger:hover:not(:disabled) {
+  background: var(--wreader-btn-danger-bg-hover);
+  color: var(--wreader-btn-danger-hover);
+}
+
+.wreader-annotation-highlight:hover:not(:disabled) {
+  background: #fff7dc;
+  color: #8a651d;
+}
+
+.wreader-btn-link {
+  min-height: 28px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0 6px;
+  border-radius: var(--wreader-btn-radius-sm);
+  color: var(--wreader-btn-ghost-text);
+  font-size: var(--wreader-btn-font-sm);
+  font-weight: var(--wreader-btn-font-weight);
+}
+
+.wreader-btn-link:hover:not(:disabled) {
+  background: var(--wreader-btn-ghost-hover);
+  color: #33475a;
+}
+
+.wreader-btn-link-accent {
+  color: var(--wreader-btn-primary);
+}
+
+.wreader-btn-link-accent:hover:not(:disabled) {
+  background: #eef5fc;
+  color: var(--wreader-btn-primary-hover);
+}
+
+.wreader-btn-sm {
+  min-height: var(--wreader-btn-height-sm);
+  padding-inline: 10px;
+  font-size: var(--wreader-btn-font-sm);
+}
+
+.wreader-btn-lg {
+  min-height: var(--wreader-btn-height-lg);
+  padding-inline: 16px;
+  border-radius: var(--wreader-btn-radius-lg);
+  font-size: var(--wreader-btn-font-lg);
+}
+
+.wreader-btn-block {
+  width: 100%;
+}
+
+.wreader-btn-icon {
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  min-height: 32px;
+  display: inline-grid;
+  place-items: center;
+  padding: 0;
+  border-radius: var(--wreader-btn-radius-md);
+  color: #667687;
+}
+
+.wreader-btn-icon:hover:not(:disabled) {
+  background: var(--wreader-btn-ghost-hover);
+  color: #33475a;
+}
+
+.wreader-btn-icon-round {
+  border-radius: 999px;
+}
+
+/*
+ * Existing semantic surfaces mapped onto the same action tokens.
+ * These selectors intentionally preserve their component-specific markup.
+ */
+:is(
+  .wreader-settings-actions button,
+  .wreader-settings-folder-composer button,
+  .wreader-feed-edit-card footer button,
+  .wreader-ai-actions > div > button,
+  .wreader-model-modal-card footer button
+) {
+  height: var(--wreader-btn-height-md);
+  min-height: var(--wreader-btn-height-md);
+  padding: 0 14px;
+  border: 1px solid transparent;
+  border-radius: var(--wreader-btn-radius-md);
+  font-size: var(--wreader-btn-font-md);
+  font-weight: var(--wreader-btn-font-weight);
+}
+
+:is(
+  .wreader-settings-actions button,
+  .wreader-settings-folder-composer button[type="submit"],
+  .wreader-feed-edit-card footer button[type="submit"],
+  .wreader-ai-actions > div > button,
+  .wreader-model-modal-card footer button[type="submit"]
+):not(.secondary):not(.danger) {
+  background: var(--wreader-btn-primary);
+  color: var(--wreader-btn-primary-text);
+}
+
+:is(
+  .wreader-settings-actions button,
+  .wreader-settings-folder-composer button[type="submit"],
+  .wreader-feed-edit-card footer button[type="submit"],
+  .wreader-ai-actions > div > button,
+  .wreader-model-modal-card footer button[type="submit"]
+):not(.secondary):not(.danger):hover:not(:disabled) {
+  background: var(--wreader-btn-primary-hover);
+}
+
+:is(
+  .wreader-settings-actions button.secondary,
+  .wreader-settings-folder-composer button[type="button"],
+  .wreader-feed-edit-card footer button.secondary,
+  .wreader-ai-actions > div > button.secondary,
+  .wreader-model-modal-card footer button.secondary
+) {
+  background: var(--wreader-btn-secondary);
+  color: var(--wreader-btn-secondary-text);
+}
+
+:is(
+  .wreader-settings-actions button.secondary,
+  .wreader-settings-folder-composer button[type="button"],
+  .wreader-feed-edit-card footer button.secondary,
+  .wreader-ai-actions > div > button.secondary,
+  .wreader-model-modal-card footer button.secondary
+):hover:not(:disabled) {
+  background: var(--wreader-btn-secondary-hover);
+  color: #3f5366;
+}
+
+/* Standard square icon actions: settings, dialogs, row tools and failure detail. */
+:is(
+  .wreader-settings-close,
+  .wreader-settings-row-actions button,
+  .wreader-feed-edit-card header > button,
+  .wreader-model-modal-card header > button
+) {
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  min-height: 32px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border-radius: var(--wreader-btn-radius-md);
+  color: #748291;
+}
+
+:is(
+  .wreader-settings-close,
+  .wreader-settings-row-actions button,
+  .wreader-feed-edit-card header > button,
+  .wreader-model-modal-card header > button
+):hover:not(:disabled) {
+  background: var(--wreader-btn-ghost-hover);
+  color: #3d5266;
+}
+
+/* Compact row tools stay visually light but share the same geometry/state model. */
+:is(.wreader-notes-actions button, .wreader-search-box button) {
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  min-height: 28px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border-radius: 7px;
+}
+
+:is(.wreader-notes-actions button, .wreader-search-box button):hover:not(:disabled) {
+  background: var(--wreader-btn-ghost-hover);
+}
+
+.wreader-notes-editor button {
+  min-height: var(--wreader-btn-height-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 10px;
+  border-radius: var(--wreader-btn-radius-md);
+  color: var(--wreader-btn-ghost-text);
+  font-size: var(--wreader-btn-font-sm);
+  font-weight: var(--wreader-btn-font-weight);
+}
+
+.wreader-notes-editor button:hover:not(:disabled) {
+  background: var(--wreader-btn-ghost-hover);
+}
+
+.wreader-notes-editor button.primary {
+  background: var(--wreader-btn-primary);
+  color: var(--wreader-btn-primary-text);
+}
+
+.wreader-notes-editor button.primary:hover:not(:disabled) {
+  background: var(--wreader-btn-primary-hover);
+}
+
+/* Header / chrome icon buttons keep their circular identity and shared focus behavior. */
+.wreader-icon-button {
+  transition:
+    background-color var(--wreader-btn-transition),
+    color var(--wreader-btn-transition),
+    opacity var(--wreader-btn-transition);
+}
+
+.wreader-icon-button:hover:not(:disabled) {
+  background: var(--wreader-btn-ghost-hover);
+  color: #42576b;
+}
+
+/* Lightweight text actions use one consistent hover/focus treatment. */
+:is(
+  .wreader-toast button,
+  .wreader-failure-list button,
+  .wreader-timeline-load-more button,
+  .wreader-ai-actions .link-button
+) {
+  border-radius: var(--wreader-btn-radius-sm);
+}
+
+:is(
+  .wreader-toast button,
+  .wreader-failure-list button,
+  .wreader-timeline-load-more button,
+  .wreader-ai-actions .link-button
+):hover:not(:disabled) {
+  background: #eef5fc;
+}
+
+/* Destructive actions use the same red treatment wherever they appear. */
+:is(
+  .wreader-settings-row-actions button.danger,
+  .wreader-settings-row-actions .wreader-settings-danger-button,
+  .wreader-settings-menu button.danger,
+  .wreader-feed-edit-card footer button.danger
+) {
+  color: var(--wreader-btn-danger);
+}
+
+:is(
+  .wreader-settings-row-actions button.danger,
+  .wreader-settings-row-actions .wreader-settings-danger-button,
+  .wreader-settings-menu button.danger,
+  .wreader-feed-edit-card footer button.danger
+):hover:not(:disabled) {
+  background: var(--wreader-btn-danger-bg-hover);
+  color: var(--wreader-btn-danger-hover);
+}
+
+/* Player controls intentionally retain their circular transport-control system. */
+.player-icon-btn,
+.player-toggle,
+.player-speed {
+  outline-offset: 2px;
+}
+
+@media (max-width: 767px) {
+  .wreader-btn {
+    min-height: 44px;
+  }
+
+  .wreader-btn-sm {
+    min-height: 40px;
+  }
+
+  .wreader-btn-icon {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    min-height: 40px;
+  }
+}

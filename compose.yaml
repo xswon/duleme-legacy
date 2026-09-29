@@ -1,0 +1,30 @@
+services:
+  wreader:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: wreader-dev
+    restart: unless-stopped
+    environment:
+      PORT: 4387
+      HMR_PORT: 4388
+      DOCKER: "true"
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      NEXTECHO_URL: ${NEXTECHO_URL:-http://host.docker.internal:8765}
+      ALLOW_PROXY_SYNTHETIC_DNS: ${ALLOW_PROXY_SYNTHETIC_DNS:-false}
+      OUTBOUND_PROXY_URL: ${OUTBOUND_PROXY_URL:-}
+    ports:
+      - "127.0.0.1:4387:4387"
+      - "127.0.0.1:4388:4388"
+    volumes:
+      - .:/app
+      - wreader_node_modules:/app/node_modules
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:4387/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+volumes:
+  wreader_node_modules:

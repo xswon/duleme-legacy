@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- 焦点电光蓝正圆渐变 (与界面播放键同源) -->
+    <linearGradient id="inoreaderBlue" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3B82F6"/>
+      <stop offset="50%" stop-color="#2563EB"/>
+      <stop offset="100%" stop-color="#1D4ED8"/>
+    </linearGradient>
+
+    <!-- 微弱冷银外边缘圈 -->
+    <linearGradient id="circleRim" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#1D4ED8" stop-opacity="0.2"/>
+    </linearGradient>
+
+    <!-- 纯净轻微立体微投影 -->
+    <filter id="badgeShadow" x="-15%" y="-15%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#1D4ED8" flood-opacity="0.28"/>
+    </filter>
+  </defs>
+
+  <!-- 1. 核心底台：正圆形蓝色徽章 -->
+  <g filter="url(#badgeShadow)">
+    <circle cx="256" cy="256" r="236" fill="url(#inoreaderBlue)"/>
+    <circle cx="256" cy="256" r="235" fill="none" stroke="url(#circleRim)" stroke-width="2"/>
+  </g>
+
+  <!-- 2. 白色纯几何图形组：开卷书托 + 舒缓中心声波 -->
+  <g>
+    <!-- ================= 纯白几何开卷底托 (12px 扎实几何厚度) ================= -->
+    <path d="M 142 332 C 176 314, 218 314, 256 328 C 294 314, 336 314, 370 332" 
+          fill="none" 
+          stroke="#FFFFFF" 
+          stroke-width="12" 
+          stroke-linecap="round"/>
+
+    <!-- ================= 5 根纯几何声柱 [高度微调优化版] ================= -->
+    
+    <!-- Bar 1 [低频 · 56px · 70% 透明度] -->
+    <rect x="152" y="248" width="16" height="56" rx="8" fill="#FFFFFF" fill-opacity="0.7"/>
+
+    <!-- Bar 2 [中频 · 98px · 85% 透明度] -->
+    <rect x="199" y="198" width="16" height="98" rx="8" fill="#FFFFFF" fill-opacity="0.85"/>
+
+    <!-- Bar 3 [主峰微降 · 124px · 100% 纯白]：顶端降至 176，更圆融耐看 -->
+    <rect x="248" y="176" width="16" height="124" rx="8" fill="#FFFFFF"/>
+
+    <!-- Bar 4 [中频 · 98px · 85% 透明度] -->
+    <rect x="297" y="198" width="16" height="98" rx="8" fill="#FFFFFF" fill-opacity="0.85"/>
+
+    <!-- Bar 5 [低频 · 56px · 70% 透明度] -->
+    <rect x="344" y="248" width="16" height="56" rx="8" fill="#FFFFFF" fill-opacity="0.7"/>
+  </g>
+</svg>

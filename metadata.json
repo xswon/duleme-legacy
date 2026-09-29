@@ -1,0 +1,6 @@
+{
+  "name": "读了么",
+  "description": "本地优先的 RSS 阅读器，支持订阅、阅读、收藏、笔记、播客与可选 AI 增强。",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}

@@ -1,0 +1,400 @@
+/* Local overrides for the AI model settings. Keep the main page and the
+ * secondary configuration dialog visually light and avoid stacked dividers. */
+
+.wreader-model-settings-page {
+  gap: 18px;
+}
+
+.wreader-model-settings-page > h3,
+.wreader-transcription-options-main > h3 {
+  margin: 0 0 2px !important;
+  line-height: 1.4;
+}
+
+.wreader-transcription-options-main {
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.wreader-model-modal-card {
+  width: min(640px, calc(100vw - 32px));
+  max-height: min(640px, calc(100dvh - 32px));
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 18px;
+  background: #fff;
+}
+
+.wreader-model-modal-card header,
+.wreader-model-modal-card footer,
+.wreader-model-modal-body {
+  background: #fff;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+/* The modal is one continuous white surface. Remove inherited section dividers
+ * from the base settings styles; only form controls keep their own outlines. */
+.wreader-model-modal-card > header,
+.wreader-model-modal-card > .wreader-model-modal-body,
+.wreader-model-modal-card > footer,
+.wreader-model-modal-card > * + * {
+  border-top: 0 !important;
+  border-bottom: 0 !important;
+}
+
+.wreader-model-modal-card header {
+  min-height: 64px;
+  flex: 0 0 auto;
+  padding: 0 24px;
+  border-bottom: 0 !important;
+}
+
+.wreader-model-modal-card header h2 {
+  font-size: 16px;
+}
+
+.wreader-model-modal-body {
+  min-height: 0;
+  flex: 1 1 auto;
+  gap: 16px;
+  padding: 10px 24px 14px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+.wreader-model-field {
+  gap: 8px;
+}
+
+.wreader-model-field > label {
+  font-size: 13px;
+}
+
+.wreader-model-modal .wreader-ai-select-wrap select,
+.wreader-model-modal .wreader-ai-key-field {
+  min-height: 44px;
+  border-color: #dfe4e8;
+  border-radius: 10px;
+  box-shadow: none;
+}
+
+.wreader-model-modal .wreader-ai-select-wrap select:focus,
+.wreader-model-modal .wreader-ai-key-field:focus-within {
+  border-color: #b8c8d8;
+  box-shadow: 0 0 0 2px rgba(47, 117, 194, .08);
+}
+
+.wreader-model-modal .wreader-ai-key-field input:disabled {
+  cursor: not-allowed;
+  color: #98a3ad;
+}
+
+.wreader-model-modal .wreader-ai-key-field button:disabled {
+  cursor: not-allowed;
+  opacity: .45;
+}
+
+.wreader-model-key-actions {
+  min-height: 32px;
+  align-items: center;
+}
+
+.wreader-model-test-button {
+  min-height: 36px;
+  padding: 0 14px;
+  border-color: #dfe4e8;
+  background: #fff;
+  color: #435462;
+}
+
+.wreader-model-test-button:hover:not(:disabled) {
+  background: #f8fafb;
+}
+
+.wreader-model-clear-button {
+  padding-left: 0;
+}
+
+.wreader-model-modal-card footer {
+  min-height: 64px;
+  flex: 0 0 auto;
+  padding: 10px 24px 16px;
+  border-top: 1px solid #eef1f3 !important;
+  align-items: center;
+  justify-content: flex-end;
+  background: #fff;
+}
+
+.wreader-model-modal-card footer button {
+  min-width: 64px;
+}
+
+.wreader-model-modal-footer-actions {
+  display: flex;
+  flex: none;
+  align-items: center;
+}
+
+.wreader-model-modal-toast {
+  position: absolute;
+  z-index: 3;
+  top: 20px;
+  left: 50%;
+  max-width: min(420px, calc(100vw - 40px));
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.wreader-model-modal-toast .wreader-model-feedback {
+  min-height: 42px;
+  margin: 0;
+  padding: 9px 14px;
+  border: 1px solid #e5e8eb;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, .14);
+  color: #536271;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.wreader-model-modal-toast .wreader-model-feedback.is-error,
+.wreader-model-modal-toast .wreader-model-feedback.is-warning {
+  color: #8d4444;
+}
+
+.wreader-model-modal-toast .wreader-model-feedback.is-info {
+  color: #52718c;
+}
+
+.wreader-model-modal-toast .wreader-model-feedback.is-success {
+  color: #55705f;
+}
+
+.wreader-model-api-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: stretch;
+  gap: 10px;
+}
+
+.wreader-model-api-row .wreader-model-test-button {
+  min-height: 44px;
+  min-width: 88px;
+  padding: 0 14px;
+}
+
+@media (max-width: 760px) {
+  .wreader-model-modal-card {
+    width: min(640px, calc(100vw - 24px));
+  }
+
+  .wreader-model-modal-card header {
+    padding: 0 18px;
+  }
+
+  .wreader-model-modal-body {
+    padding: 10px 18px 6px;
+  }
+
+  .wreader-model-modal-card footer {
+    min-height: 58px;
+    padding: 8px 18px 12px;
+  }
+
+  .wreader-model-api-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+  }
+
+  .wreader-model-api-row .wreader-model-test-button {
+    min-width: 80px;
+    padding: 0 10px;
+  }
+
+  .wreader-model-modal-toast {
+    top: 12px;
+  }
+}
+
+
+.wreader-model-hint,
+.wreader-model-catalog-warning {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.6;
+  color: #6f7d88;
+}
+
+.wreader-model-catalog-warning {
+  color: #8b5e24;
+}
+
+.wreader-model-label-row {
+  display: flex;
+  min-height: 28px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.wreader-model-label-row > label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.wreader-model-label-row > button {
+  border: 0;
+  background: transparent;
+  color: #52697c;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.wreader-model-label-row > button:disabled {
+  cursor: not-allowed;
+  opacity: .45;
+}
+
+.wreader-content-model-state {
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  padding: 9px 12px;
+  border: 1px dashed #dfe4e8;
+  border-radius: 10px;
+  background: #fafbfc;
+  color: #74818b;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.wreader-content-model-select select {
+  min-height: 44px;
+}
+
+.wreader-content-model-choices {
+  display: grid;
+  gap: 8px;
+}
+
+.wreader-content-model-choice {
+  min-height: 46px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 12px;
+  border: 1px solid #dfe4e8;
+  border-radius: 10px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.wreader-content-model-choice:hover {
+  background: #f9fbfc;
+}
+
+.wreader-content-model-choice.is-selected {
+  border-color: #a9bfd4;
+  box-shadow: 0 0 0 2px rgba(47, 117, 194, .07);
+}
+
+.wreader-content-model-choice input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: currentColor;
+}
+
+.wreader-content-model-choice > span {
+  min-width: 0;
+  flex: 1;
+  display: grid;
+  gap: 2px;
+}
+
+.wreader-content-model-choice strong,
+.wreader-content-model-choice small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wreader-content-model-choice strong {
+  color: #273746;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.wreader-content-model-choice small {
+  color: #7d8992;
+  font-size: 11px;
+}
+
+.wreader-content-model-choice em {
+  flex: none;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: #f0f5f9;
+  color: #5a7082;
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 600;
+}
+
+.wreader-model-advanced {
+  display: grid;
+  gap: 12px;
+}
+
+.wreader-model-advanced-toggle {
+  min-height: 32px;
+  width: fit-content;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #667784;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.wreader-model-advanced-toggle svg {
+  width: 14px;
+  height: 14px;
+  transition: transform .15s ease;
+}
+
+.wreader-model-advanced-toggle[aria-expanded="true"] svg {
+  transform: rotate(180deg);
+}
+
+.wreader-model-advanced-toggle:disabled {
+  cursor: not-allowed;
+  opacity: .45;
+}
+
+.wreader-model-advanced-body {
+  display: grid;
+  gap: 18px;
+  padding: 14px;
+  border-radius: 12px;
+  background: #f8fafb;
+}
+
+.wreader-model-advanced-body[hidden] {
+  display: none;
+}
+
+.wreader-model-key-actions > span:not(:empty) {
+  max-width: 70%;
+  color: #7b8790;
+  font-size: 11px;
+  line-height: 1.45;
+}

@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>读了么 · v21 Prototype</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="prototype-app" id="app">
+    <aside class="sidebar" aria-label="主导航">
+      <header class="sidebar-header">
+        <a class="brand" href="?view=timeline" aria-label="读了么"><span class="brand-mark">读</span><span class="brand-name">读了么</span></a>
+        <div class="sidebar-header-actions">
+          <button class="icon-button sidebar-search" data-action="view-search" data-icon="search" aria-label="搜索"></button>
+          <button class="icon-button sidebar-collapse" data-action="collapse-sidebar" data-icon="panel-left-close" aria-label="收起边栏"></button>
+        </div>
+      </header>
+
+      <div class="sidebar-scroll">
+        <section class="nav-section reading-nav">
+          <div class="nav-section-label">阅读</div>
+          <button class="nav-item is-active" data-action="view-timeline"><span class="nav-leading" data-icon="inbox"></span><span class="nav-label">时间线</span><span class="nav-count">12</span></button>
+          <button class="nav-item" data-action="view-starred"><span class="nav-leading" data-icon="star"></span><span class="nav-label">收藏</span><span class="nav-count">6</span></button>
+        </section>
+        <section class="nav-section">
+          <div class="nav-section-label">快捷入口</div>
+          <button class="nav-item" data-action="view-podcast"><span class="nav-leading" data-icon="headphones"></span><span class="nav-label">音频</span></button>
+          <button class="nav-item" data-action="view-notes"><span class="nav-leading" data-icon="notebook"></span><span class="nav-label">笔记</span></button>
+        </section>
+        <section class="subscription-section">
+          <div class="subscription-heading"><span>我的订阅</span><button class="icon-button tiny" data-icon="refresh-cw" aria-label="刷新订阅源"></button></div>
+          <div class="feed-tree">
+            <button class="folder-row"><span class="chevron" data-icon="chevron-down"></span><span>科技</span></button>
+            <button class="feed-row is-selected"><span class="feed-avatar">少</span><span class="feed-name">少数派</span><span class="feed-count">12</span></button>
+            <button class="feed-row"><span class="feed-avatar">3</span><span class="feed-name">36Kr</span><span class="feed-count">4</span></button>
+            <button class="feed-row"><span class="feed-avatar">S</span><span class="feed-name">Stratechery</span><span class="feed-count">7</span></button>
+            <button class="folder-row"><span class="chevron" data-icon="chevron-right"></span><span>商业</span></button>
+            <button class="folder-row"><span class="chevron" data-icon="chevron-right"></span><span>设计</span></button>
+          </div>
+          <button class="subscription-add"><span data-icon="plus"></span><span>添加订阅</span></button>
+        </section>
+      </div>
+      <footer class="sidebar-footer"><button class="nav-item settings-entry" data-action="view-settings"><span class="nav-leading" data-icon="settings"></span><span class="nav-label">设置</span></button></footer>
+    </aside>
+
+    <main class="master" aria-label="内容列表">
+      <header class="master-header">
+        <div class="master-title-row">
+          <button class="icon-button mobile-menu" data-icon="menu" aria-label="导航菜单"></button>
+          <div><h1 id="master-title">时间线 <span class="title-count">12</span></h1><span class="window-label">最近 30 天</span></div>
+          <div class="master-actions"><button class="icon-button" data-icon="check-check" aria-label="全部标为已读"></button><button class="icon-button" data-icon="arrow-down-up" aria-label="排序"></button></div>
+        </div>
+        <div class="filter-row" id="timeline-filters"><button class="filter-chip is-active">全部</button><button class="filter-chip">文章</button><button class="filter-chip">播客</button><button class="filter-chip filter-unread"><span>未读</span><b>12</b></button></div>
+        <div class="search-box" id="search-box"><span data-icon="search"></span><input value="AI Agent" aria-label="搜索" /><button class="icon-button tiny" data-icon="x" aria-label="清除搜索"></button></div>
+      </header>
+
+      <div class="story-list" id="story-list">
+        <button class="story-row is-selected" data-kind="article"><span class="story-thumb image-a">AI</span><span class="story-main"><span class="story-meta"><i class="unread-dot"></i><span>少数派</span></span><strong>AI Agent 正在改变软件，但真正被改变的是我们的工作方式</strong><span class="story-summary">当软件开始主动完成任务，界面的角色也开始发生变化。</span><span class="story-time">18 分钟前</span></span></button>
+        <button class="story-row" data-kind="article"><span class="story-thumb image-b">S</span><span class="story-main"><span class="story-meta"><i class="unread-dot"></i><span>Stratechery</span></span><strong>The Interface After Apps</strong><span class="story-summary">从应用程序到任务代理，用户界面的价值正在重新分配。</span><span class="story-time">1 小时前</span></span></button>
+        <button class="story-row" data-kind="podcast"><span class="story-thumb image-c">P</span><span class="story-main"><span class="story-meta"><i class="unread-dot"></i><span>硅谷101</span></span><strong>从 Copilot 到 Agent：AI 产品下一阶段</strong><span class="story-summary">为什么真正的 Agent 产品，不应该只是聊天框加工具调用。</span><span class="story-time"><span data-icon="headphones"></span> 58 分钟 · 3 小时前</span></span></button>
+        <button class="story-row is-read" data-kind="article"><span class="story-thumb image-d">36</span><span class="story-main"><span class="story-meta"><span>36Kr</span></span><strong>大模型应用的下一场竞争，不再只是模型能力</strong><span class="story-summary">工作流、数据和交互体验开始成为产品壁垒。</span><span class="story-time">昨天</span></span></button>
+        <button class="story-row is-read" data-kind="article"><span class="story-thumb image-e">L</span><span class="story-main"><span class="story-meta"><span>Linear Blog</span></span><strong>Building Products With Calm Interfaces</strong><span class="story-summary">密度、节奏与一致性决定工具型产品是否真正高效。</span><span class="story-time">昨天</span></span></button>
+        <button class="story-row" data-kind="podcast"><span class="story-thumb image-f">声</span><span class="story-main"><span class="story-meta"><i class="unread-dot"></i><span>声东击西</span></span><strong>我们为什么需要重新理解信息消费</strong><span class="story-summary">订阅、推荐与注意力之间，用户应该拥有怎样的主动权。</span><span class="story-time"><span data-icon="headphones"></span> 42 分钟 · 周一</span></span></button>
+        <button class="story-row is-read" data-kind="article"><span class="story-thumb image-g">F</span><span class="story-main"><span class="story-meta"><span>Figma</span></span><strong>Design Systems for Dense Productivity Apps</strong><span class="story-summary">Design tokens 不是变量表，而是产品视觉决策的单一来源。</span><span class="story-time">周一</span></span></button>
+        <button class="story-row is-read" data-kind="article"><span class="story-thumb image-h">I</span><span class="story-main"><span class="story-meta"><span>Intercom</span></span><strong>Why Great Software Feels Quiet</strong><span class="story-summary">让内容成为最高层级，而不是让界面不断提醒用户它的存在。</span><span class="story-time">上周五</span></span></button>
+        <button class="story-row is-read" data-kind="article"><span class="story-thumb image-i">R</span><span class="story-main"><span class="story-meta"><span>Readwise</span></span><strong>Reading as a Workflow, Not a Destination</strong><span class="story-summary">收藏、笔记和回顾应该形成连续的信息处理链路。</span><span class="story-time">上周四</span></span></button>
+        <button class="story-row is-read" data-kind="article"><span class="story-thumb image-j">A</span><span class="story-main"><span class="story-meta"><span>a16z</span></span><strong>Interfaces for AI-Native Software</strong><span class="story-summary">AI 原生软件可能需要完全不同的状态表达和反馈方式。</span><span class="story-time">上周三</span></span></button>
+      </div>
+
+      <div class="podcast-list" id="podcast-list">
+        <button class="queue-row is-selected"><span class="queue-cover image-c">P</span><span><strong>从 Copilot 到 Agent：AI 产品下一阶段</strong><small>硅谷101 · 58 分钟</small></span><span class="queue-progress"><i style="width:42%"></i></span></button>
+        <button class="queue-row"><span class="queue-cover image-f">声</span><span><strong>我们为什么需要重新理解信息消费</strong><small>声东击西 · 42 分钟</small></span><span class="queue-progress"><i style="width:18%"></i></span></button>
+        <button class="queue-row"><span class="queue-cover image-b">S</span><span><strong>The Interface After Apps</strong><small>Sharp Tech · 64 分钟</small></span><span class="queue-progress"><i style="width:0%"></i></span></button>
+      </div>
+
+      <div class="search-results" id="search-results">
+        <button class="search-result is-selected"><strong><mark>AI Agent</mark> 正在改变软件，但真正被改变的是我们的工作方式</strong><span>少数派 · 18 分钟前</span><p>当软件开始主动完成任务，界面的角色也开始发生变化。真正值得关注的是 <mark>Agent</mark> 如何嵌入工作流。</p></button>
+        <button class="search-result"><strong>The Interface After <mark>Apps</mark></strong><span>Stratechery · 1 小时前</span><p>从应用程序到任务代理，用户界面的价值正在重新分配。</p></button>
+        <button class="search-result"><strong>从 Copilot 到 <mark>Agent</mark>：AI 产品下一阶段</strong><span>硅谷101 · 播客 · 3 小时前</span><p>为什么真正的 Agent 产品，不应该只是聊天框加工具调用。</p></button>
+      </div>
+    </main>
+
+    <section class="workspace" aria-label="阅读与收听工作区">
+      <header class="workspace-toolbar"><button class="icon-button mobile-back" data-icon="chevron-left" data-action="mobile-back" aria-label="返回时间线"></button><span class="mobile-workspace-source">少数派</span><div class="reader-actions"><button class="icon-button" data-icon="circle-check" aria-label="标记已读"></button><button class="icon-button is-active-soft" data-icon="star" aria-label="收藏"></button><button class="icon-button desktop-action" data-icon="external-link" aria-label="打开原文"></button><button class="icon-button desktop-action" data-icon="type" aria-label="阅读设置"></button><button class="icon-button desktop-action" data-icon="maximize-2" aria-label="沉浸阅读"></button><button class="icon-button mobile-action" data-icon="ellipsis" aria-label="更多"></button></div></header>
+
+      <article class="reader" id="reader-view"><div class="reader-column">
+        <header class="article-header"><h1>AI Agent 正在改变软件，但真正被改变的是我们的工作方式</h1><p class="article-dek">当软件从“等待用户点击”转向“主动完成任务”，我们熟悉的应用界面正在被重新定义。</p><div class="article-meta"><span>少数派</span><span>·</span><span>2026 年 9 月 16 日</span><span>·</span><span>8 分钟阅读</span></div></header>
+        <nav class="content-tabs" aria-label="文章内容"><button class="is-active"><span data-icon="file-text"></span>正文</button><button><span data-icon="sparkles"></span>精华</button><button><span data-icon="audio-lines"></span>逐字稿</button><button><span data-icon="notebook"></span>笔记</button></nav>
+        <div class="article-body"><p class="lead">过去十年，软件产品的基本交互模型非常稳定：用户进入一个应用，理解它的导航结构，然后逐步完成任务。AI Agent 正在打破这套默认假设。</p><p>新的变化不是把一个聊天框塞进现有产品，而是让软件开始承担更多“理解意图、规划步骤、执行操作、反馈结果”的责任。这会直接影响信息架构、页面密度和用户对状态的理解。</p><h2>界面从目的地变成工作状态</h2><p>当用户的目标从“打开某个功能”转变为“完成某件事”，页面不再需要不断证明自己的存在。真正优秀的工具会逐渐降低视觉噪音，把注意力还给内容、任务和决策。</p><blockquote>好的生产力工具应该让用户更快进入工作状态，而不是让用户持续感知界面本身。</blockquote><p>这也是为什么高密度阅读工具通常拥有稳定的导航栏、列表栏和内容栏。稳定的空间关系能够减少重新定位成本，让用户建立长期肌肉记忆。</p><h2>密度不是拥挤</h2><p>高信息密度并不意味着把所有东西压缩得更小。更重要的是让相同层级的内容使用相同的节奏，让辅助信息减少竞争，让主要内容拥有足够的呼吸空间。</p><ul><li>导航应该紧凑，但可预测。</li><li>列表应该高密度，但仍可快速扫描。</li><li>正文应该宽松，而且保持稳定的阅读宽度。</li></ul></div>
+      </div></article>
+
+      <article class="listening" id="listening-view"><div class="listening-column"><header class="episode-header"><div class="episode-cover image-c">P</div><div class="episode-info"><span class="eyebrow">硅谷101 · 当前播放</span><h1>从 Copilot 到 Agent：AI 产品下一阶段</h1><p>从工具调用、长任务到真正的工作流代理，我们讨论 AI 产品如何从辅助工具变成执行系统。</p></div></header><section class="player-card"><div class="progress-track"><i style="width:42%"></i></div><div class="player-time"><span>24:18</span><span>58:02</span></div><div class="player-controls"><button class="icon-button" data-icon="rotate-ccw" aria-label="后退 15 秒"></button><button class="play-button" data-icon="pause" aria-label="暂停"></button><button class="icon-button" data-icon="rotate-cw" aria-label="前进 15 秒"></button><button class="speed-button">1.25×</button></div></section><nav class="content-tabs"><button class="is-active"><span data-icon="sparkles"></span>精华</button><button><span data-icon="audio-lines"></span>逐字稿</button><button><span data-icon="notebook"></span>笔记</button></nav><section class="episode-insights"><div class="insight-kicker"><span data-icon="sparkles"></span>本期精华</div><h2>真正的 Agent 产品，需要把“执行状态”设计成第一等信息</h2><p>节目认为，Agent 的关键不是聊天体验，而是让用户理解它正在做什么、已经做了什么，以及何时需要用户介入。</p><div class="chapter-list"><button><span>08:42</span><strong>Copilot 与 Agent 的边界</strong></button><button><span>21:06</span><strong>长任务如何设计可见状态</strong></button><button><span>37:14</span><strong>未来的应用是否还需要首页</strong></button></div></section></div></article>
+
+      <article class="tool-detail" id="tool-detail"><div class="reader-column compact"><span class="eyebrow">搜索结果</span><h1>AI Agent 正在改变软件，但真正被改变的是我们的工作方式</h1><div class="article-meta"><span>少数派</span><span>·</span><span>18 分钟前</span></div><p class="tool-preview">当软件从“等待用户点击”转向“主动完成任务”，我们熟悉的应用界面正在被重新定义……</p><button class="secondary-button">在阅读器中打开</button></div></article>
+    </section>
+
+    <nav class="mobile-tabs" aria-label="移动端主导航"><button class="is-active" data-action="view-timeline"><span data-icon="inbox"></span><small>时间线</small></button><button data-action="view-search"><span data-icon="search"></span><small>搜索</small></button><button data-action="view-starred"><span data-icon="star"></span><small>收藏</small></button><button><span data-icon="menu"></span><small>更多</small></button></nav>
+
+    <div class="modal-backdrop" id="settings-modal" aria-hidden="true"><section class="settings-modal" role="dialog" aria-modal="true" aria-label="设置"><header><h2>设置</h2><button class="icon-button" data-action="close-settings" data-icon="x" aria-label="关闭"></button></header><div class="settings-layout"><nav class="settings-nav"><button class="is-active"><span data-icon="rss"></span>订阅管理</button><button><span data-icon="folder"></span>文件夹</button><button><span data-icon="sparkles"></span>AI</button><button><span data-icon="database"></span>数据与备份</button><button><span data-icon="keyboard"></span>快捷键</button></nav><div class="settings-content"><section class="settings-section"><div><h3>订阅管理</h3><p>管理订阅源、顺序和所属文件夹。</p></div><button class="secondary-button"><span data-icon="plus"></span>添加订阅</button></section><div class="settings-search"><span data-icon="search"></span><input placeholder="搜索订阅源" /></div><div class="settings-feed-row"><span class="feed-avatar">少</span><div><strong>少数派</strong><small>https://sspai.com/feed</small></div><span class="tag">科技</span><button class="icon-button" data-icon="ellipsis" aria-label="更多"></button></div><div class="settings-feed-row"><span class="feed-avatar">3</span><div><strong>36Kr</strong><small>https://36kr.com/feed</small></div><span class="tag">科技</span><button class="icon-button" data-icon="ellipsis" aria-label="更多"></button></div><div class="settings-feed-row"><span class="feed-avatar">S</span><div><strong>Stratechery</strong><small>https://stratechery.com/feed</small></div><span class="tag">商业</span><button class="icon-button" data-icon="ellipsis" aria-label="更多"></button></div></div></div></section></div>
+  </div>
+  <script src="./prototype.js"></script>
+</body>
+</html>

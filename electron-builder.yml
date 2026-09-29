@@ -1,0 +1,34 @@
+appId: com.duleme.reader
+productName: 读了么
+electronVersion: 44.4.3
+
+directories:
+  output: release
+  buildResources: build
+
+files:
+  - dist/**/*
+  - dist-electron/**/*
+  - package.json
+
+asar: true
+artifactName: Duleme-${version}-${os}-${arch}.${ext}
+
+mac:
+  category: public.app-category.news
+  icon: build/icon.svg
+  identity: null
+  target:
+    - target: dmg
+      arch:
+        - arm64
+        - x64
+
+win:
+  icon: build/icon.svg
+  target:
+    - nsis
+
+nsis:
+  oneClick: true
+  perMachine: false
