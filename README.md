@@ -31,12 +31,13 @@ http://127.0.0.1:4387
 
 当前 Tauri 原型只迁移 RSS 获取/解析主链路，用于验证启动、订阅和真实包体；AI、转录等可选能力暂未迁移到桌面 Rust 后端。
 
-本地构建原型需要 Rust toolchain；Tauri CLI 固定为 2.12.0，由 npm 脚本按需调用：
+本地构建原型需要 Rust toolchain。构建脚本会从 `build/icon.svg` 生成 Tauri/macOS 图标，并使用 Tauri 的 ad-hoc signing 生成测试包：
 
 ```bash
 npm run desktop:build
 ```
 
+ad-hoc signing 不是 Developer ID 签名或 notarization，macOS 仍可能要求在“系统设置 → 隐私与安全性”中手动允许首次启动。
 
 ## 数据与隐私
 

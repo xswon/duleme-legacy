@@ -59,6 +59,18 @@ jobs:
           cache: npm
       - name: Install web dependencies
         run: npm ci
+      - name: Generate Tauri icons
+        run: npm run desktop:icons
+      - name: Validate generated app icon
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s src-tauri/icons/icon.icns
+          test -s src-tauri/icons/icon.png
+          width="$(sips -g pixelWidth src-tauri/icons/icon.png | awk '/pixelWidth/ {print $2}')"
+          height="$(sips -g pixelHeight src-tauri/icons/icon.png | awk '/pixelHeight/ {print $2}')"
+          test "$width" = "512"
+          test "$height" = "512"
       - name: Cache Rust build
         uses: actions/cache@v4
         with:
@@ -73,6 +85,29 @@ jobs:
         run: cargo test --manifest-path src-tauri/Cargo.toml
       - name: Build Tauri macOS prototype
         run: npm run desktop:build
+      - name: Verify ad-hoc signed application
+        shell: bash
+        run: |
+          set -euo pipefail
+          app_path="$(find src-tauri/target/release/bundle/macos -maxdepth 1 -name '*.app' -type d -print -quit)"
+          test -n "$app_path"
+          codesign --verify --deep --strict --verbose=2 "$app_path"
+          codesign -dv --verbose=4 "$app_path" 2>&1 | tee /tmp/duleme-codesign.txt
+          grep -q 'Signature=adhoc' /tmp/duleme-codesign.txt
+          test -s "$app_path/Contents/Resources/icon.icns"
+          plutil -lint "$app_path/Contents/Info.plist"
+      - name: Verify DMG contents
+        shell: bash
+        run: |
+          set -euo pipefail
+          dmg_path="$(find src-tauri/target/release/bundle/dmg -maxdepth 1 -name '*.dmg' -type f -print -quit)"
+          mount_point="$(mktemp -d /tmp/duleme-tauri-dmg.XXXXXX)"
+          hdiutil attach "$dmg_path" -nobrowse -readonly -mountpoint "$mount_point" >/dev/null
+          trap 'hdiutil detach "$mount_point" -quiet || true' EXIT
+          app_path="$(find "$mount_point" -maxdepth 1 -name '*.app' -type d -print -quit)"
+          test -n "$app_path"
+          codesign --verify --deep --strict --verbose=2 "$app_path"
+          test -L "$mount_point/Applications"
       - name: Report package size
         shell: bash
         run: |
