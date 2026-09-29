@@ -19,11 +19,11 @@ async function openExternal(value) {
   if (isHttpUrl(value)) await shell.openExternal(value);
 }
 
-async function ensureLocalServer() {
+async function ensureLocalServer(staticDirOverride) {
   if (localServer && localAppUrl) return localAppUrl;
 
   const localHost = "127.0.0.1";
-  const staticDir = path.join(app.getAppPath(), "dist");
+  const staticDir = staticDirOverride || path.join(app.getAppPath(), "dist");
   localServer = await startServer({
     host: localHost,
     port: 0,
@@ -82,6 +82,7 @@ async function createMainWindow() {
 }
 
 function smokeResultPath() {
+  if (process.env.DULEME_SMOKE_RESULT) return process.env.DULEME_SMOKE_RESULT;
   const prefix = "--smoke-result=";
   const arg = process.argv.find((value) => value.startsWith(prefix));
   return arg ? arg.slice(prefix.length) : "";
@@ -94,22 +95,24 @@ function writeSmokeResult(value) {
 
 async function runSmokeTest() {
   writeSmokeResult("starting");
-  const appUrl = await ensureLocalServer();
+  const packagedStaticDir = path.join(process.resourcesPath, "app.asar", "dist");
+  const appUrl = await ensureLocalServer(packagedStaticDir);
   const response = await fetch(`${appUrl}/api/health`);
   if (!response.ok) throw new Error(`Desktop smoke test failed: HTTP ${response.status}`);
   writeSmokeResult("ok");
   localServer?.close();
 }
 
-if (process.argv.includes("--smoke-test")) {
-  app.whenReady()
-    .then(runSmokeTest)
-    .then(() => app.exit(0))
+const smokeMode = process.env.DULEME_SMOKE_TEST === "1" || process.argv.includes("--smoke-test");
+
+if (smokeMode) {
+  runSmokeTest()
+    .then(() => process.exit(0))
     .catch((error) => {
       const message = error instanceof Error ? error.message : String(error);
       try { writeSmokeResult(`error:${message}`); } catch { /* best effort */ }
       console.error("Duleme desktop smoke test failed", error);
-      app.exit(1);
+      process.exit(1);
     });
 } else {
   app.whenReady().then(async () => {
