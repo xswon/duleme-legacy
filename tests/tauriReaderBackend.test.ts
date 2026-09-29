@@ -32,6 +32,33 @@ describe("Tauri ReaderBackend", () => {
     });
   });
 
+  it("routes BidClub detail through Rust and preserves the existing response shape", async () => {
+    const invoke = vi.fn(async () => ({
+      title: "Episode",
+      dek: "Deck",
+      lang: "zh",
+      tldr_md: "Short summary",
+      digest_md: "### Chapter One\n\nDeep summary",
+      transcript_md: "Host\n\nHello world",
+      source_url: "https://example.com/episode",
+      duration_min: 42,
+      shows: { name: "Show", hosts: "Host" },
+      chips: ["AI"],
+    }));
+    setReaderBackend(createTauriReaderBackend(invoke));
+
+    const response = await backendRequest("/api/bidclub/episode?url=episode-a");
+    expect(response.ok).toBe(true);
+    const payload = await response.json();
+
+    expect(invoke).toHaveBeenCalledWith("fetch_bidclub_episode", { reference: "episode-a" });
+    expect(payload.title).toBe("Episode");
+    expect(payload.tldrHtml).toContain("<p>Short summary</p>");
+    expect(payload.digestHtml).toContain('id="chapter-1"');
+    expect(payload.transcriptHtml).toContain("<strong>Host</strong>");
+    expect(payload.chapters).toEqual([{ id: "chapter-1", title: "Chapter One" }]);
+  });
+
   it("does not fall back to arbitrary browser networking on desktop", async () => {
     const invoke = vi.fn();
     setReaderBackend(createTauriReaderBackend(invoke));
