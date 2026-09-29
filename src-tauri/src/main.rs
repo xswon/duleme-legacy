@@ -55,7 +55,11 @@ fn clean_text(value: &str) -> Option<String> {
 
 fn node_text(node: Node<'_, '_>) -> Option<String> {
     let mut text = String::new();
-    for part in node.descendants().filter_map(|descendant| descendant.text()) {
+    for part in node
+        .descendants()
+        .filter(|descendant| descendant.is_text())
+        .filter_map(|descendant| descendant.text())
+    {
         text.push_str(part);
     }
     clean_text(&text)
