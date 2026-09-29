@@ -85,23 +85,50 @@ jobs:
           test -n "$executable"
           result_file="/tmp/duleme-smoke-result.txt"
           rm -f "$result_file"
-          python3 - "$app_path" "$result_file" <<'PY'
+          python3 - "$executable" "$result_file" <<'PY'
+          import os
           import pathlib
           import subprocess
           import sys
+          import time
 
-          app_path = sys.argv[1]
+          executable = sys.argv[1]
           result_file = pathlib.Path(sys.argv[2])
-          try:
-              subprocess.run(
-                  ["open", "-W", app_path, "--args", "--smoke-test", f"--smoke-result={result_file}"],
-                  timeout=45,
-                  check=False,
-              )
-          except subprocess.TimeoutExpired:
-              pass
+          env = os.environ.copy()
+          env["DULEME_SMOKE_TEST"] = "1"
+          env["DULEME_SMOKE_RESULT"] = str(result_file)
+          env["ELECTRON_ENABLE_LOGGING"] = "1"
 
-          state = result_file.read_text().strip() if result_file.exists() else "missing"
+          process = subprocess.Popen(
+              [executable],
+              env=env,
+              stdout=subprocess.PIPE,
+              stderr=subprocess.PIPE,
+              text=True,
+          )
+
+          state = "missing"
+          for _ in range(30):
+              if result_file.exists():
+                  state = result_file.read_text().strip()
+                  if state == "ok" or state.startswith("error:"):
+                      break
+              if process.poll() is not None:
+                  break
+              time.sleep(1)
+
+          if process.poll() is None:
+              process.terminate()
+          try:
+              stdout, stderr = process.communicate(timeout=5)
+          except subprocess.TimeoutExpired:
+              process.kill()
+              stdout, stderr = process.communicate()
+
+          print(stdout, end="")
+          print(stderr, end="", file=sys.stderr)
+          if result_file.exists():
+              state = result_file.read_text().strip()
           print(f"Desktop smoke result: {state}")
           if state != "ok":
               raise SystemExit(1)
