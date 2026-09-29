@@ -446,10 +446,18 @@ async fn pinned_resolution(url: &Url) -> Result<Option<(String, SocketAddr)>, St
                 IpAddr::V4(ip) => is_public_ipv4(ip) || is_proxy_synthetic_ipv4(ip),
                 IpAddr::V6(ip) => is_public_ipv6(ip),
             };
-            if addresses.iter().any(|address| !address_is_allowed(address)) {
-                return Err("Feed hostname resolves to a non-public address".to_string());
+            let allowed_addresses = addresses
+                .into_iter()
+                .filter(address_is_allowed)
+                .collect::<Vec<_>>();
+            if allowed_addresses.is_empty() {
+                return Err("Feed hostname resolves only to non-public addresses".to_string());
             }
-            Ok(Some((hostname, addresses[0])))
+
+            // The HTTP client is pinned to this validated address, so a mixed
+            // DNS answer cannot make the request fall through to a rejected
+            // private/special-use address.
+            Ok(Some((hostname, allowed_addresses[0])))
         }
     }
 }
