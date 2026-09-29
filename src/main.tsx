@@ -8,6 +8,9 @@ import './styles/prototype-reader.css';
 import './styles/prototype-player.css';
 import './styles/button-system.css';
 import { PrototypeTooltipLayer } from './components/PrototypeTooltipLayer';
+import { installTauriReaderBackend } from './services/tauriReaderBackend';
+
+installTauriReaderBackend();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

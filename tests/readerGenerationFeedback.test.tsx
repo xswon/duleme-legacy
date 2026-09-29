@@ -26,6 +26,7 @@ describe("reader generation feedback", () => {
       toast: null,
       refreshFeedback: null,
       refreshState: { failed: [], successful: 0, newArticles: 0 },
+      isRefreshing: false,
       failureDetailsOpen: false,
       onFailureDetailsOpenChange: vi.fn(),
       onDismissRefresh: vi.fn(),
@@ -49,6 +50,35 @@ describe("reader generation feedback", () => {
     expect(container.textContent).toContain("《Long episode》的逐字稿生成失败");
     await act(async () => container.querySelector<HTMLButtonElement>('[aria-label="关闭生成失败提示"]')?.click());
     expect(onDismiss).toHaveBeenCalledWith("episode-1");
+
+    await act(async () => root.unmount());
+  });
+  it("shows the concrete feed error and makes retry activity visible", async () => {
+    const container = document.createElement("div");
+    const root = createRoot(container);
+    const retry = vi.fn();
+
+    await act(async () => root.render(
+      <ReaderFeedbackLayer
+        toast={null}
+        refreshFeedback="failure"
+        refreshState={{
+          failed: [{ id: "feed-a", title: "Feed A", feedUrl: "https://example.com/feed", siteUrl: "https://example.com", category: "test", unreadCount: 0, lastSyncError: "HTTP 503: upstream unavailable" }],
+          successful: 0,
+          newArticles: 0
+        }}
+        isRefreshing={true}
+        failureDetailsOpen={true}
+        onFailureDetailsOpenChange={vi.fn()}
+        onDismissRefresh={vi.fn()}
+        onRetryFailed={retry}
+        onRetryFeed={retry}
+      />,
+    ));
+
+    expect(container.textContent).toContain("HTTP 503: upstream unavailable");
+    expect(container.textContent).toContain("重试中…");
+    expect(Array.from(container.querySelectorAll("button")).filter((button) => button.textContent === "重试中…").every((button) => button.disabled)).toBe(true);
 
     await act(async () => root.unmount());
   });

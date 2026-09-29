@@ -44,22 +44,91 @@ jobs:
       - name: Architecture boundaries
         run: npm run check:architecture
 
-  # Keep this context while it is required by the main ruleset. It becomes the
-  # Tauri packaging gate once the minimal shell lands.
   desktop-package-check:
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
+    runs-on: macos-latest
+    timeout-minutes: 45
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           persist-credentials: false
-      - name: Confirm Electron beta is retired
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install web dependencies
+        run: npm ci
+      - name: Generate Tauri icons
+        run: npm run desktop:icons
+      - name: Validate generated app icon
         shell: bash
         run: |
           set -euo pipefail
-          test ! -f .github/workflows/release-desktop.yml
-          test ! -f electron-builder.yml
-          test ! -f electron/main.mjs
-          ! grep -q '"desktop:dist"' package.json
-          test -f docs/BACKEND_ARCHITECTURE.md
+          test -s src-tauri/icons/icon.icns
+          test -s src-tauri/icons/icon.png
+          width="$(sips -g pixelWidth src-tauri/icons/icon.png | awk '/pixelWidth/ {print $2}')"
+          height="$(sips -g pixelHeight src-tauri/icons/icon.png | awk '/pixelHeight/ {print $2}')"
+          test "$width" = "512"
+          test "$height" = "512"
+      - name: Cache Rust build
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            src-tauri/target
+          key: tauri-rust-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('src-tauri/Cargo.toml') }}
+          restore-keys: |
+            tauri-rust-${{ runner.os }}-${{ runner.arch }}-
+      - name: Test Rust RSS core
+        run: cargo test --manifest-path src-tauri/Cargo.toml
+      - name: Build Tauri macOS prototype
+        run: npm run desktop:build
+      - name: Verify ad-hoc signed application
+        shell: bash
+        run: |
+          set -euo pipefail
+          app_path="$(find src-tauri/target/release/bundle/macos -maxdepth 1 -name '*.app' -type d -print -quit)"
+          test -n "$app_path"
+          codesign --verify --deep --strict --verbose=2 "$app_path"
+          codesign -dv --verbose=4 "$app_path" 2>&1 | tee /tmp/duleme-codesign.txt
+          grep -q 'Signature=adhoc' /tmp/duleme-codesign.txt
+          test -s "$app_path/Contents/Resources/icon.icns"
+          plutil -lint "$app_path/Contents/Info.plist"
+      - name: Verify DMG contents
+        shell: bash
+        run: |
+          set -euo pipefail
+          dmg_path="$(find src-tauri/target/release/bundle/dmg -maxdepth 1 -name '*.dmg' -type f -print -quit)"
+          mount_point="$(mktemp -d /tmp/duleme-tauri-dmg.XXXXXX)"
+          hdiutil attach "$dmg_path" -nobrowse -readonly -mountpoint "$mount_point" >/dev/null
+          trap 'hdiutil detach "$mount_point" -quiet || true' EXIT
+          app_path="$(find "$mount_point" -maxdepth 1 -name '*.app' -type d -print -quit)"
+          test -n "$app_path"
+          codesign --verify --deep --strict --verbose=2 "$app_path"
+          test -L "$mount_point/Applications"
+      - name: Report package size
+        shell: bash
+        run: |
+          set -euo pipefail
+          app_path="$(find src-tauri/target/release/bundle/macos -maxdepth 1 -name '*.app' -type d -print -quit)"
+          dmg_path="$(find src-tauri/target/release/bundle/dmg -maxdepth 1 -name '*.dmg' -type f -print -quit)"
+          test -n "$app_path"
+          test -n "$dmg_path"
+          app_kb="$(du -sk "$app_path" | awk '{print $1}')"
+          dmg_bytes="$(stat -f '%z' "$dmg_path")"
+          {
+            echo "## Tauri macOS prototype size"
+            echo ""
+            echo "- Runner architecture: $(uname -m)"
+            echo "- App bundle: $app_path — $((app_kb / 1024)) MiB"
+            echo "- DMG: $dmg_path — $((dmg_bytes / 1024 / 1024)) MiB"
+          } >> "$GITHUB_STEP_SUMMARY"
+          du -sh "$app_path" "$dmg_path"
+      - name: Upload Tauri DMG
+        uses: actions/upload-artifact@v4
+        with:
+          name: duleme-tauri-macos-${{ github.sha }}
+          path: src-tauri/target/release/bundle/dmg/*.dmg
+          if-no-files-found: error

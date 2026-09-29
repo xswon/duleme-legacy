@@ -424,7 +424,7 @@ export default function App() {
     </nav>}
     <AddFeedModal isOpen={isAddFeedOpen} onClose={() => setIsAddFeedOpen(false)} existingFeeds={feeds} onAddFeed={feedManagement.addFeed} onImportOpmlFile={feedManagement.importOpmlFile} onShowToast={showToast} />
     <KeyboardShortcutsModal isOpen={isShortcutsOpen} onClose={() => setIsShortcutsOpen(false)} />
-    <ReaderFeedbackLayer toast={toast} refreshFeedback={refreshFeedback.refreshFeedback} refreshState={refreshState}
+    <ReaderFeedbackLayer toast={toast} refreshFeedback={refreshFeedback.refreshFeedback} refreshState={refreshState} isRefreshing={isRefreshing}
       failureDetailsOpen={refreshFeedback.isRefreshFailureDetailsOpen} onFailureDetailsOpenChange={refreshFeedback.setIsRefreshFailureDetailsOpen}
       onDismissRefresh={() => { refreshFeedback.setRefreshFeedback(null); refreshFeedback.setIsRefreshFailureDetailsOpen(false); }}
       onRetryFailed={() => { void refreshAll(refreshState.failed.map((feed) => feed.id)); }} onRetryFeed={(feedId) => { void retryFeed(feedId); }}

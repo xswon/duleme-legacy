@@ -31,8 +31,7 @@ React feature/service
         Rust core
 ```
 
-The current web adapter delegates to `fetch`. A later Tauri adapter will map
-the same product operations to Rust commands.
+The web adapter delegates to `fetch`. The first Tauri adapter maps RSS parsing to a Rust command and returns an explicit 501 for desktop operations that have not been migrated yet. This prevents accidental fallback to arbitrary browser networking inside the desktop shell.
 
 Do not introduce new direct environment-specific network calls in components.
 New backend capabilities should be added behind the backend boundary.
@@ -74,3 +73,16 @@ The first Tauri milestone is deliberately small: launch the existing React UI,
 add one RSS feed through Rust, persist it locally, restart, and confirm the data
 is still present. Measure the real macOS package size at that point before
 migrating the remaining optional capabilities.
+
+
+## First Tauri prototype
+
+The first desktop prototype intentionally keeps the scope narrow:
+
+- Tauri serves the existing Vite/React UI through the system WebView.
+- `/api/rss/parse` is intercepted by the Tauri `ReaderBackend` adapter and invokes the Rust `fetch_rss` command.
+- Rust validates public HTTP(S) URLs, rejects local/private/special IP ranges, pins validated DNS resolution for the request, re-validates redirects, enforces a response-size limit, and parses RSS/Atom into the existing frontend response shape.
+- IndexedDB remains the persistence layer, so subscription state can survive an app restart without introducing a new database migration.
+- Unmigrated desktop backend endpoints fail closed with HTTP 501 semantics.
+
+The release profile uses LTO, size optimization, symbol stripping, and panic aborts so the measured package reflects the project's small-binary goal.
