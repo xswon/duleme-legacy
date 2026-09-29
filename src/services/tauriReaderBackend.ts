@@ -1,4 +1,5 @@
-import type { RssParseResponse } from "../types";
+import { marked } from "marked";
+import type { BidclubEpisode, RssParseResponse } from "../types";
 import { setReaderBackend, type ReaderBackend } from "./readerBackend";
 
 export type TauriInvoke = (
@@ -14,6 +15,25 @@ declare global {
       };
     };
   }
+}
+
+interface RawBidclubEpisode {
+  title?: unknown;
+  dek?: unknown;
+  dek_alt?: unknown;
+  lang?: unknown;
+  lang_alt?: unknown;
+  tldr_md?: unknown;
+  digest_md?: unknown;
+  transcript_md?: unknown;
+  tldr_md_alt?: unknown;
+  digest_md_alt?: unknown;
+  source_url?: unknown;
+  source_label?: unknown;
+  thumbnail_url?: unknown;
+  duration_min?: unknown;
+  shows?: { name?: unknown; hosts?: unknown } | null;
+  chips?: unknown;
 }
 
 function requestUrl(input: RequestInfo | URL): URL {
@@ -47,8 +67,77 @@ function errorMessage(error: unknown): string {
   return "Desktop backend request failed.";
 }
 
+function text(value: unknown): string {
+  return typeof value === "string" ? value : "";
+}
+
+function formatTranscript(markdown: string): string {
+  if (!markdown) return "";
+  const lines = markdown.split("\n");
+  return lines.map((line, index) => {
+    const value = line.trim();
+    const blankBefore = index === 0 || !lines[index - 1].trim();
+    const blankAfter = index === lines.length - 1 || !lines[index + 1].trim();
+    return value
+      && value.length <= 15
+      && blankBefore
+      && blankAfter
+      && !/\s/.test(value)
+      && !/[。，、！？：；,.!?:;…"'')\]》」〉】]$/.test(value)
+      && !/^[#*\-\[>`~]/.test(value)
+      ? `**${value}**`
+      : line;
+  }).join("\n");
+}
+
+function digestWithChapters(markdown: string): { html: string; chapters: { id: string; title: string }[] } {
+  const chapters: { id: string; title: string }[] = [];
+  if (!markdown) return { html: "", chapters };
+  for (const line of markdown.split("\n")) {
+    const match = line.match(/^###\s+(.+)$/);
+    if (match) chapters.push({ id: `chapter-${chapters.length + 1}`, title: match[1].trim() });
+  }
+  let index = 0;
+  const html = String(marked.parse(markdown)).replace(
+    /<h3([^>]*)>/g,
+    (_match, attrs) => `<h3${attrs} id="chapter-${++index}">`,
+  );
+  return { html, chapters };
+}
+
+function renderMarkdown(value: unknown): string {
+  const markdown = text(value);
+  return markdown ? String(marked.parse(markdown)) : "";
+}
+
+function mapBidclubEpisode(raw: RawBidclubEpisode): BidclubEpisode {
+  const digest = digestWithChapters(text(raw.digest_md));
+  const digestAlt = digestWithChapters(text(raw.digest_md_alt));
+  return {
+    title: text(raw.title),
+    dek: text(raw.dek),
+    dekAlt: text(raw.dek_alt),
+    lang: text(raw.lang),
+    langAlt: text(raw.lang_alt),
+    tldrHtml: renderMarkdown(raw.tldr_md),
+    digestHtml: digest.html,
+    transcriptHtml: renderMarkdown(formatTranscript(text(raw.transcript_md))),
+    tldrAltHtml: renderMarkdown(raw.tldr_md_alt),
+    digestAltHtml: digestAlt.html,
+    chapters: digest.chapters,
+    chaptersAlt: digestAlt.chapters,
+    sourceUrl: text(raw.source_url),
+    sourceLabel: text(raw.source_label),
+    thumbnailUrl: text(raw.thumbnail_url),
+    durationMin: typeof raw.duration_min === "number" ? raw.duration_min : null,
+    showName: text(raw.shows?.name),
+    hosts: text(raw.shows?.hosts),
+    chips: Array.isArray(raw.chips) ? raw.chips.filter((chip): chip is string => typeof chip === "string") : [],
+  };
+}
+
 /**
- * Tauri adapter for the operations already moved into Rust.
+ * Tauri adapter for operations already moved into Rust.
  *
  * Unmigrated endpoints intentionally return 501 instead of silently falling
  * back to browser networking. This keeps desktop security boundaries explicit.
@@ -67,6 +156,17 @@ export function createTauriReaderBackend(invoke: TauriInvoke): ReaderBackend {
           return jsonResponse(payload);
         } catch (error) {
           return jsonResponse({ error: errorMessage(error) }, 500);
+        }
+      }
+
+      if (method === "GET" && url.pathname === "/api/bidclub/episode") {
+        const reference = (url.searchParams.get("url") || url.searchParams.get("slug") || "").trim();
+        if (!reference) return jsonResponse({ error: "Missing episode url or slug parameter" }, 400);
+        try {
+          const raw = await invoke("fetch_bidclub_episode", { reference }) as RawBidclubEpisode;
+          return jsonResponse(mapBidclubEpisode(raw));
+        } catch (error) {
+          return jsonResponse({ error: `Failed to fetch BidClub episode: ${errorMessage(error)}` }, 502);
         }
       }
 
