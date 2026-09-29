@@ -31,10 +31,9 @@ http://127.0.0.1:4387
 
 当前 Tauri 原型只迁移 RSS 获取/解析主链路，用于验证启动、订阅和真实包体；AI、转录等可选能力暂未迁移到桌面 Rust 后端。
 
-本地构建原型需要 Rust toolchain 和 Tauri CLI 2.12：
+本地构建原型需要 Rust toolchain；Tauri CLI 固定为 2.12.0，由 npm 脚本按需调用：
 
 ```bash
-cargo install tauri-cli --version 2.12.0 --locked
 npm run desktop:build
 ```
 
