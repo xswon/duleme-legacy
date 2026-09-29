@@ -4,7 +4,7 @@
 
 ## 当前状态
 
-项目目前处于 Public Beta 准备阶段。主线以本地单用户使用为目标，不是公开互联网多用户服务。
+项目正在迁移到 Web-first + Tauri/Rust 架构。Electron beta.2 已停止，不会继续发布。当前主线仍以本地单用户使用为目标，同时保留未来 Web 版本的部署路径。
 
 ## 运行方式
 
@@ -23,15 +23,11 @@ http://127.0.0.1:4387
 
 也可以使用仓库中的 Docker Compose 开发环境。
 
-## Desktop
+## Desktop 与 Web
 
-macOS Desktop 版本使用 Electron 打包，目标包括 Apple Silicon（arm64）和 Intel（x64）。
+桌面端目标为 Tauri：macOS 优先，同时保持 Windows 使用同一套 React UI 和 Rust 核心能力。Electron 发布链已经停止。
 
-```bash
-npm run desktop:dist
-```
-
-当前 Beta 构建尚未使用 Apple Developer ID 签名或 notarization，首次打开可能需要通过 macOS 的“系统设置 → 隐私与安全性 → 仍要打开”。
+前端通过统一的 `ReaderBackend` 边界访问后端能力；Web 版本使用 HTTP adapter，Tauri 版本使用 desktop adapter。架构与迁移顺序见 `docs/BACKEND_ARCHITECTURE.md`。
 
 ## 数据与隐私
 

@@ -39,87 +39,27 @@ jobs:
         run: npm run test:coverage
       - name: Build
         run: npm run build
-      - name: Build desktop main process
-        run: npm run build:desktop-main
       - name: Bundle budget
         run: npm run check:bundle
       - name: Architecture boundaries
         run: npm run check:architecture
 
+  # Keep this context while it is required by the main ruleset. It becomes the
+  # Tauri packaging gate once the minimal shell lands.
   desktop-package-check:
-    if: github.event_name == 'push' || (github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]')
-    runs-on: macos-latest
-    timeout-minutes: 45
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           persist-credentials: false
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-      - name: Install dependencies
-        run: npm ci
-      - name: Build unsigned arm64 and x64 DMGs
-        env:
-          CSC_IDENTITY_AUTO_DISCOVERY: "false"
-        run: npm run desktop:dist
-      - name: Verify production server health
+      - name: Confirm Electron beta is retired
         shell: bash
         run: |
           set -euo pipefail
-          NODE_ENV=production PORT=4387 node dist/server.cjs > /tmp/duleme-server.log 2>&1 &
-          server_pid=$!
-          cleanup() { kill "$server_pid" 2>/dev/null || true; }
-          trap cleanup EXIT
-          for attempt in {1..20}; do
-            if curl -fsS http://127.0.0.1:4387/api/health | grep -q '"status":"ok"'; then
-              exit 0
-            fi
-            sleep 0.5
-          done
-          cat /tmp/duleme-server.log
-          exit 1
-      - name: Validate both DMG application bundles
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          validate_dmg() {
-            local dmg="$1"
-            local expected_arch="$2"
-            local mount_point
-            mount_point="$(mktemp -d /tmp/duleme-dmg.XXXXXX)"
-            hdiutil attach "$dmg" -nobrowse -readonly -mountpoint "$mount_point" >/dev/null
-            local app_path
-            app_path="$(find "$mount_point" -maxdepth 1 -name '*.app' -print -quit)"
-            test -n "$app_path"
-            test -f "$app_path/Contents/Info.plist"
-            test -s "$app_path/Contents/Resources/app.asar"
-
-            local executable
-            executable="$(find "$app_path/Contents/MacOS" -maxdepth 1 -type f -perm -111 -print -quit)"
-            test -n "$executable"
-
-            local bundle_id
-            bundle_id="$(plutil -extract CFBundleIdentifier raw -o - "$app_path/Contents/Info.plist")"
-            test "$bundle_id" = "com.duleme.reader"
-
-            local version
-            version="$(plutil -extract CFBundleShortVersionString raw -o - "$app_path/Contents/Info.plist")"
-            test "$version" = "0.1.0-beta.2"
-
-            local archs
-            archs="$(lipo -archs "$executable")"
-            case " $archs " in
-              *" $expected_arch "*) ;;
-              *) echo "Expected $expected_arch in $executable, found: $archs" >&2; exit 1 ;;
-            esac
-
-            hdiutil detach "$mount_point" -quiet
-          }
-
-          validate_dmg "$(ls release/*-arm64.dmg | head -n1)" arm64
-          validate_dmg "$(ls release/*-x64.dmg | head -n1)" x86_64
+          test ! -f .github/workflows/release-desktop.yml
+          test ! -f electron-builder.yml
+          test ! -f electron/main.mjs
+          ! grep -q '"desktop:dist"' package.json
+          test -f docs/BACKEND_ARCHITECTURE.md

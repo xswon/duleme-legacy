@@ -1,4 +1,5 @@
 import { getAiErrorMessage, getAiRequestConfig } from "./aiSettingsService";
+import { backendRequest } from "./readerBackend";
 import {
   Article,
   AudioProgress,
@@ -400,7 +401,7 @@ export function summarizeFeedRefreshResults(
 // Fetch single RSS feed from server API
 export async function fetchRssFeed(feedUrl: string): Promise<RssParseResponse> {
   const encodeUrl = encodeURIComponent(feedUrl);
-  const response = await fetch(`/api/rss/parse?url=${encodeUrl}`);
+  const response = await backendRequest(`/api/rss/parse?url=${encodeUrl}`);
   if (!response.ok) {
     const errJson = await response.json().catch(() => ({}));
     throw new Error(errJson.error || `HTTP ${response.status}: Failed to parse RSS feed`);
@@ -1120,7 +1121,7 @@ export function migrateAudioProgressMap(
 // Fetch full BidClub episode detail (TL;DR + digest + transcript) from server proxy
 export async function fetchBidclubEpisode(episodeUrl: string): Promise<BidclubEpisode> {
   const encodeUrl = encodeURIComponent(episodeUrl);
-  const response = await fetch(`/api/bidclub/episode?url=${encodeUrl}`);
+  const response = await backendRequest(`/api/bidclub/episode?url=${encodeUrl}`);
   if (!response.ok) {
     const errJson = await response.json().catch(() => ({}));
     throw new Error(errJson.error || `HTTP ${response.status}: Failed to fetch BidClub episode`);
@@ -1137,7 +1138,7 @@ export async function summarizeArticleWithAI(
   onProgress?: (progress: number) => void,
 ): Promise<string> {
   const config = await getAiRequestConfig();
-  const response = await fetch(`/api/ai/summarize${onProgress ? "?stream=1" : ""}`, {
+  const response = await backendRequest(`/api/ai/summarize${onProgress ? "?stream=1" : ""}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ title, content, snippet, source, ...(config ? { config } : {}) }),
