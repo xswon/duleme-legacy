@@ -324,6 +324,11 @@ fn blocked_hostname(hostname: &str) -> bool {
         || hostname.ends_with(".home.arpa")
 }
 
+fn is_proxy_synthetic_ipv4(ip: Ipv4Addr) -> bool {
+    let octets = ip.octets();
+    octets[0] == 198 && (octets[1] == 18 || octets[1] == 19)
+}
+
 fn is_public_ipv4(ip: Ipv4Addr) -> bool {
     let octets = ip.octets();
     if ip.is_private()
@@ -348,7 +353,7 @@ fn is_public_ipv4(ip: Ipv4Addr) -> bool {
     if octets[0] == 192 && octets[1] == 88 && octets[2] == 99 {
         return false;
     }
-    if octets[0] == 198 && (octets[1] == 18 || octets[1] == 19) {
+    if is_proxy_synthetic_ipv4(ip) {
         return false;
     }
     true
@@ -428,7 +433,20 @@ async fn pinned_resolution(url: &Url) -> Result<Option<(String, SocketAddr)>, St
                 .await
                 .map_err(|error| format!("Unable to resolve feed hostname: {error}"))?
                 .collect::<Vec<_>>();
-            if addresses.is_empty() || addresses.iter().any(|address| !is_public_ip(address.ip())) {
+            if addresses.is_empty() {
+                return Err("Feed hostname did not resolve to an address".to_string());
+            }
+
+            // TUN/fake-IP proxies such as Clash and Surge commonly synthesize
+            // 198.18.0.0/15 answers for public hostnames. Accept that range only
+            // for DNS names (never IP literals), while continuing to reject
+            // loopback, LAN, link-local, metadata, documentation, and other
+            // special-use addresses.
+            let address_is_allowed = |address: &SocketAddr| match address.ip() {
+                IpAddr::V4(ip) => is_public_ipv4(ip) || is_proxy_synthetic_ipv4(ip),
+                IpAddr::V6(ip) => is_public_ipv6(ip),
+            };
+            if addresses.iter().any(|address| !address_is_allowed(address)) {
                 return Err("Feed hostname resolves to a non-public address".to_string());
             }
             Ok(Some((hostname, addresses[0])))
@@ -546,6 +564,9 @@ mod tests {
         }
         assert!(is_public_ip("1.1.1.1".parse().unwrap()));
         assert!(is_public_ip("2606:4700:4700::1111".parse().unwrap()));
+        assert!(is_proxy_synthetic_ipv4("198.18.0.1".parse().unwrap()));
+        assert!(is_proxy_synthetic_ipv4("198.19.255.254".parse().unwrap()));
+        assert!(!is_proxy_synthetic_ipv4("198.20.0.1".parse().unwrap()));
     }
 
     #[test]
