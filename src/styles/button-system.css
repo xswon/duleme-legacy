@@ -314,6 +314,19 @@ button.wreader-featured-feed-card:hover {
   color: #3d5266;
 }
 
+/* Text actions inside a row menu must not inherit the square icon-button sizing. */
+.wreader-settings-menu button {
+  width: 100%;
+  min-width: 0;
+  height: auto;
+  min-height: 0;
+  display: block;
+  padding: 7px 8px;
+  place-items: initial;
+  text-align: left;
+  white-space: nowrap;
+}
+
 /* Compact row tools stay visually light but share the same geometry/state model. */
 :is(.wreader-notes-actions button, .wreader-search-box button) {
   width: 28px;
