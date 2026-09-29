@@ -534,9 +534,59 @@ async fn fetch_rss(url: String) -> Result<RssParseResponse, String> {
     parse_feed(&body, &url, &effective_url)
 }
 
+fn canonical_bidclub_slug(reference: &str) -> Result<String, String> {
+    let value = reference.trim();
+    if value.is_empty() {
+        return Err("BidClub episode reference is empty".to_string());
+    }
+
+    let slug = if let Ok(url) = Url::parse(value) {
+        if !matches!(url.scheme(), "http" | "https")
+            || !url.host_str().is_some_and(|host| host.eq_ignore_ascii_case("bidclub.ai"))
+        {
+            return Err("BidClub episode URL must use bidclub.ai".to_string());
+        }
+        let segments = url
+            .path_segments()
+            .map(|segments| segments.filter(|segment| !segment.is_empty()).collect::<Vec<_>>())
+            .unwrap_or_default();
+        if segments.len() != 2 || segments[0] != "e" {
+            return Err("Invalid BidClub episode URL".to_string());
+        }
+        segments[1].to_string()
+    } else {
+        value.to_string()
+    };
+
+    if slug.len() > 200
+        || slug.chars().any(|character| {
+            character.is_control()
+                || character.is_whitespace()
+                || matches!(character, '/' | '?' | '#')
+        })
+    {
+        return Err("Invalid BidClub episode reference".to_string());
+    }
+    Ok(slug)
+}
+
+#[tauri::command]
+async fn fetch_bidclub_episode(reference: String) -> Result<serde_json::Value, String> {
+    let slug = canonical_bidclub_slug(&reference)?;
+    let mut url = Url::parse("https://bidclub.ai/api/v1/episodes/")
+        .map_err(|error| format!("Invalid BidClub API URL: {error}"))?;
+    url.path_segments_mut()
+        .map_err(|_| "Invalid BidClub API URL".to_string())?
+        .push(&slug);
+
+    let (body, _) = fetch_feed_bytes(url.as_str()).await?;
+    serde_json::from_slice(&body)
+        .map_err(|error| format!("Invalid BidClub response: {error}"))
+}
+
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![fetch_rss])
+        .invoke_handler(tauri::generate_handler![fetch_rss, fetch_bidclub_episode])
         .run(tauri::generate_context!())
         .expect("error while running Duleme");
 }
@@ -567,6 +617,17 @@ mod tests {
         assert!(is_proxy_synthetic_ipv4("198.18.0.1".parse().unwrap()));
         assert!(is_proxy_synthetic_ipv4("198.19.255.254".parse().unwrap()));
         assert!(!is_proxy_synthetic_ipv4("198.20.0.1".parse().unwrap()));
+    }
+
+    #[test]
+    fn bidclub_reference_only_accepts_fixed_api_targets() {
+        assert_eq!(canonical_bidclub_slug("episode-a").unwrap(), "episode-a");
+        assert_eq!(
+            canonical_bidclub_slug("https://bidclub.ai/e/episode-a").unwrap(),
+            "episode-a"
+        );
+        assert!(canonical_bidclub_slug("https://example.com/e/episode-a").is_err());
+        assert!(canonical_bidclub_slug("../private").is_err());
     }
 
     #[test]
